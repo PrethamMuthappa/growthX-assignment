@@ -7,7 +7,7 @@ Go to the github releases page and download the latest jar file for the release
 Run the jar file using command:
 
 ```
-java -jar growthx-assignment-<version>.jar
+java -jar growthx-0.0.1-SNAPSHOT.jar
 ```
 
 
@@ -34,6 +34,28 @@ curl -X POST http://localhost:8080/login \
 -H "Content-Type: application/json" \
 -d '{
     "username": "testuser",
+    "password": "password123"
+}'
+```
+
+To register an admin
+
+```
+curl -X POST http://localhost:8080/register \
+-H "Content-Type: application/json" \
+-d '{
+    "username": "admin",
+    "password": "password123",
+    "role": "ADMIN"
+}'
+```
+To login as an admin
+
+```
+curl -X POST http://localhost:8080/login \
+-H "Content-Type: application/json" \
+-d '{
+    "username": "admin",
     "password": "password123"
 }'
 ```
