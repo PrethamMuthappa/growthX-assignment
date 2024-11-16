@@ -8,6 +8,9 @@ import org.example.jwt.repository.Userrepos;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 public class AssignmentService {
 
@@ -44,5 +47,14 @@ public class AssignmentService {
 
         Assignment savedAssignment = assignmentRepo.save(assignment);
         return ResponseEntity.ok(savedAssignment);
+    }
+
+    public List<String> alladmins() {
+
+        return userrepos.findByRole(Role.ADMIN)
+        .stream()
+        .map(User::getUsername)
+        .collect(Collectors.toList()).reversed();
+
     }
 }
