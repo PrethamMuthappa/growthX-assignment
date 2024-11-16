@@ -4,6 +4,8 @@ import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.Date;
+
 
 @Getter
 @Setter
@@ -18,4 +20,6 @@ public class Assignment {
     private String userId;
     private String task;
     private String admin;
+    private String status="pending";
+    private Date createdAt;
 }

@@ -8,6 +8,7 @@ import org.example.jwt.repository.Userrepos;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -15,7 +16,7 @@ import java.util.stream.Collectors;
 public class AssignmentService {
 
     private final AssignmentRepo assignmentRepo;
-    private final Userrepos  userrepos;
+    private final Userrepos userrepos;
 
     public AssignmentService(AssignmentRepo assignmentRepo, Userrepos userrepos) {
         this.assignmentRepo = assignmentRepo;
@@ -31,19 +32,20 @@ public class AssignmentService {
         //check if admin exists and has ADMIN role
         User admin = userrepos.findUserByUsername(adminUsername)
                 .orElse(null);
-        
+
         if (admin == null) {
             return ResponseEntity.badRequest().body("Admin user not found");
         }
-        
+
         if (!admin.getRole().equals(Role.ADMIN)) {
             return ResponseEntity.badRequest().body("Specified user is not an admin");
         }
-        
+
         Assignment assignment = new Assignment();
         assignment.setUserId(userId);
         assignment.setTask(task);
         assignment.setAdmin(adminUsername);
+        assignment.setCreatedAt(new Date());
 
         Assignment savedAssignment = assignmentRepo.save(assignment);
         return ResponseEntity.ok(savedAssignment);
@@ -52,9 +54,9 @@ public class AssignmentService {
     public List<String> alladmins() {
 
         return userrepos.findByRole(Role.ADMIN)
-        .stream()
-        .map(User::getUsername)
-        .collect(Collectors.toList()).reversed();
+                .stream()
+                .map(User::getUsername)
+                .collect(Collectors.toList()).reversed();
 
     }
 
@@ -62,7 +64,7 @@ public class AssignmentService {
         // Check if user exists and is admin
         User admin = userrepos.findUserByUsername(userid)
                 .orElse(null);
-        
+
         if (admin == null) {
             return ResponseEntity.badRequest().body("User not found");
         }
@@ -72,7 +74,67 @@ public class AssignmentService {
         }
 
         // Fetch all assignments for this admin
-       List<Assignment> assignments = assignmentRepo.findByAdmin(userid);
+        List<Assignment> assignments = assignmentRepo.findByAdmin(userid);
         return ResponseEntity.ok(assignments);
     }
+
+    public ResponseEntity<?> acceptAssignment(String assignmentId, String adminId) {
+        // Check if admin exists and has admin role
+        User admin = userrepos.findUserByUsername(adminId)
+                .orElse(null);
+
+        if (admin == null || !admin.getRole().equals(Role.ADMIN)) {
+            return ResponseEntity.badRequest().body("User is not authorized to accept assignments");
+        }
+
+        // Find the assignment
+        Assignment assignment = assignmentRepo.findById(assignmentId)
+                .orElse(null);
+
+        if (assignment == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        // Verify this admin is assigned to this assignment
+        if (!assignment.getAdmin().equals(adminId)) {
+            return ResponseEntity.badRequest().body("Not authorized to accept this assignment");
+        }
+
+        // Update status
+        assignment.setStatus("ACCEPTED");
+        Assignment updatedAssignment = assignmentRepo.save(assignment);
+
+        return ResponseEntity.ok(updatedAssignment);
+    }
+
+    public ResponseEntity<?> declineAssignment(String assignmentId, String adminId) {
+        // Check if admin exists and has admin role
+        User admin = userrepos.findUserByUsername(adminId)
+                .orElse(null);
+
+        if (admin == null || !admin.getRole().equals(Role.ADMIN)) {
+            return ResponseEntity.badRequest().body("User is not authorized to decline assignments");
+        }
+
+        // Find the assignment
+        Assignment assignment = assignmentRepo.findById(assignmentId)
+                .orElse(null);
+
+        if (assignment == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        // Verify this admin is assigned to this assignment
+        if (!assignment.getAdmin().equals(adminId)) {
+            return ResponseEntity.badRequest().body("Not authorized to decline this assignment");
+        }
+
+        // Update status
+        assignment.setStatus("DECLINED");
+        Assignment updatedAssignment = assignmentRepo.save(assignment);
+
+        return ResponseEntity.ok(updatedAssignment);
+    }
+
+
 }
