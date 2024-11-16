@@ -10,6 +10,7 @@ Run the jar file using command:
 java -jar growthx-0.0.1-SNAPSHOT.jar
 ```
 
+The app can also be built from source, just git clone and replace the mongodb credentails and run the application
 
 
 # API Endpoints
