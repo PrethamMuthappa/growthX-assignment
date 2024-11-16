@@ -57,4 +57,22 @@ public class AssignmentService {
         .collect(Collectors.toList()).reversed();
 
     }
+
+    public ResponseEntity<?> allassignment(String userid) {
+        // Check if user exists and is admin
+        User admin = userrepos.findUserByUsername(userid)
+                .orElse(null);
+        
+        if (admin == null) {
+            return ResponseEntity.badRequest().body("User not found");
+        }
+
+        if (!admin.getRole().equals(Role.ADMIN)) {
+            return ResponseEntity.badRequest().body("Specified user is not an admin");
+        }
+
+        // Fetch all assignments for this admin
+       List<Assignment> assignments = assignmentRepo.findByAdmin(userid);
+        return ResponseEntity.ok(assignments);
+    }
 }

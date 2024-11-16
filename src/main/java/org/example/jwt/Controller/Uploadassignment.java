@@ -38,4 +38,14 @@ public class Uploadassignment {
     public ResponseEntity<Object>fetchalladmin(){
      return new ResponseEntity<>(assignmentService.alladmins(),HttpStatus.OK);
     }
+
+    @GetMapping("/assignment")
+    public ResponseEntity<Object>fetchallassignment(Authentication authentication){
+        if (authentication == null || !(authentication.getPrincipal() instanceof UserDetails)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
+        }
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        String userid=userDetails.getUsername();
+        return new ResponseEntity<>(assignmentService.allassignment(userid),HttpStatus.OK);
+    }
 }
